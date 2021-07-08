@@ -12,6 +12,7 @@ Le code est fonctionnel tel quel, ca te demande un peu de taff si tu veux update
 
 ## Repository structure
 
+```
 Projet_MPG
 └─── README.md
 |
@@ -25,7 +26,7 @@ Projet_MPG
     │   total_deaths_csse.csv  ->  CSV file containing total deaths from CSSE.
     │   WWW : unimportant things to make the application more beautiful
 
-
+```
 
 
 
