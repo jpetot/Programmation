@@ -56,8 +56,8 @@ Il vous suffit faire 6/7 copier coller du tableau (en affichage 100 éléments) 
 Ce projet a été réalisé pour un projet App shiny pendant notre master. Il n'est donc pas parfait et pas souvent mis à jour, toutes Pull Request est la bienvenue pour améliorer le projet.
 
 
-@jpetot
-@hchassag
-@baptiste
+@jpetot https://www.linkedin.com/in/julien-petot-66899b177/    
+@hchassag  
+@baptiste  
 
 
