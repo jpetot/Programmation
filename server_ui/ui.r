@@ -19,32 +19,31 @@ shinyUI(fluidPage(theme = "bootstrap1.css",
                                                wellPanel(
                                                  selectInput(inputId = "team",
                                                              label = "Equipe : ",
-                                                             choices = c("PSG" = "PSG", 
-                                                                         "OM" = "OM",
-                                                                         "OL" = "OL",
-                                                                         "AS Monaco" = "ASM",
-                                                                         "ASSE" = "ASSE", 
-                                                                         "Stade Rennais FC" = "SRFC",
-                                                                         "Lille" = "LOSC",
-                                                                         "RC Strasbourg" = "RCSA",
-                                                                         "FC Nantes" = "FCN",
-                                                                         "OGC Nice" = "OGCN",
-                                                                         "Montpellier HSC" = "MHSC",
-                                                                         "Toulouse FC" = "TFC",
-                                                                         "SCO Angers" = "SCO",
-                                                                         "Dijon FC" = "DFCO",
-                                                                         "Stade Brestois 29" = "SB29",
-                                                                         "FC Girondins de Bordeaux" = "FCGB",
-                                                                         "Amiens SC" = "ASC",
-                                                                         "Stade de Reims" = "SR",
-                                                                         "Nimes Olympiques" = "NO",
-                                                                         "FC Metz" = "FCM")), 
+                                                             choices = c("PSG" = "Paris", 
+                                                                         "OM" = "Marseille",
+                                                                         "OL" = "Lyon",
+                                                                         "AS Monaco" = "Monaco",
+                                                                         "ASSE" = "Saint-Ã‰tienne", 
+                                                                         "Stade Rennais FC" = "Rennes",
+                                                                         "Lille" = "Lille",
+                                                                         "RC Strasbourg" = "Strasbourg",
+                                                                         "FC Nantes" = "Nantes",
+                                                                         "OGC Nice" = "Nice",
+                                                                         "Montpellier HSC" = "Montpellier",
+                                                                         "Brest" = "Brest",
+                                                                         "SCO Angers" = "Angers",
+                                                                         "Dijon FC" = "Dijon",
+                                                                         "Stade Brestois 29" = "Brest",
+                                                                         "FC Girondins de Bordeaux" = "Bordeaux",
+                                                                         "Lens" ="Lens",
+                                                                         "Stade de Reims" = "Reims",
+                                                                         "Nimes Olympiques" = "NÃ®mes",
+                                                                         "FC Metz" = "Metz")), 
                                                  
                                                  selectInput(inputId="tri",
                                                              label="Classer par :", 
                                                              choices = c("Poste"="Poste",
-                                                                         "Cote"="Cote",
-                                                                         "Moyenne note"= "Moyenne note")),
+                                                                         "Cote"="Cote")),
                                                  
                                                  actionButton("update_team", "GO !", style="color:blue ; background-color:white ; border-color: black")
                                                )
@@ -98,26 +97,6 @@ shinyUI(fluidPage(theme = "bootstrap1.css",
                                                           h3("Les perles rares"),
                                                           p(em("Des joueurs alliant bonnes performances, régularité et, le tout, pour un prix d'achat faible.")),
                                                           tableOutput("top_perle")
-                                                   )
-                                                 )
-                                        ),
-                                        
-                                        tabPanel(h3("Les meilleurs remplaçants"),
-                                                 fluidRow(
-                                                   column(width = 6,
-                                                          h3("Top entrées"),
-                                                          p(em("Les remplacants les plus utilisés. Ils seront plus suceptibles d'entrer en cours de match.")),
-                                                          tableOutput("top_entrees"),
-                                                          h1("_"),
-                                                          h3("Les supersubs"),
-                                                          p(em("Un 'supersub' est un remplacant qui marque souvent lorsqu'il rentre sur le terrain.")),
-                                                          tableOutput("top_supersub")
-                                                          
-                                                   ),
-                                                   column(width = 6,
-                                                          h3("Les plus prolifiques"),
-                                                          p(em("Un joueur qui a un bon ratio entre le nombre de buts marqués pour le nombre de matchs joués.")),
-                                                          tableOutput("top_prolifique")
                                                    )
                                                  )
                                         )

@@ -15,6 +15,8 @@ library(ompr.roi)
 
 library(DT)       # tableau stylé dans factoshiny
 library(shinyjs)  # Pour cacher le sidebarPanel
+library(stringi)
+
 
 
 setwd("~/Projets_M2/Projet_MPG")
@@ -25,41 +27,31 @@ setwd("~/Projets_M2/Projet_MPG")
 ############### Importation jdd ###################
 ###################################################
 
-sheet_names <- excel_sheets("Stats-MPG-saison7MPG.xlsx")
-note_mpg <- NULL
-for (i in 2:length(sheet_names)){
-  name <- sheet_names[i] # récupère le nom de la feuille
-  name2 <- paste0("sheet_",name) #nouvelle variable name
-  data <- read_excel("Stats-MPG-saison7MPG.xlsx", sheet = i) # lecture et stockage
-  data <- data[7:(nrow(data)-1),]
-  colnames(data) <- NULL
-  data$club <- name # ajout d'une variable avec le nom original de la feuille
-  note_mpg <- rbind(note_mpg,data)
-}
-note_mpg = as.data.frame(note_mpg)
+note_mpg2 = read.table("mpg_stats_07_03.csv", sep = ";", header = TRUE)
 
-# Renommer les colonnes
-vec=NULL
-for (k in 1:26){
-  vec[k] = paste("J-",k)
-}
-colnames(note_mpg) = c("Poste", "Cote", "Joueur", "Titu.", "Entrees", "Buts", "Moyenne_note", vec, "Club")
+head(note_mpg2)
 
-note_mpg = read.table("mpg_stats_2.csv", sep = ";", header = TRUE)
+######## SHOULD BE FIX IF CSV FILE IS UPDATED   ######## 
+
+colnames(note_mpg2) = c("Joueur", "Poste", "Cote", "Note", "Variation", "But" ,"j28"  ,"j27", "j26" , "j25","j24", "j23",
+                         "j22" , "j21", "j13", "j12" ,"j11","j10" , "j9" , "j8","j7",
+                         "j6", "j5", "j4",  "j3", "j2","j1",   "DMI" ,"Club", "Prochain.opposant" , "Victoire.probable") 
+note_mpg =  note_mpg2[,1:29]
+
+###### END FIX ######
+
 
 head(note_mpg)
 
+# TOP 5 des supersub --
+n = 5
 ## Convert variables
 note_mpg$Poste = as.factor(note_mpg$Poste)
 note_mpg$Cote = as.numeric(note_mpg$Cote)
-note_mpg$Titu. = as.numeric(note_mpg$Titu.)
 
-library(stringi)
+
 note_mpg$But  = stri_extract_first_regex(note_mpg$But, "[0-9]+")
 note_mpg$But = as.numeric(note_mpg$But)
-
-note_mpg$Entrees = as.numeric(note_mpg$Entrees)
-note_mpg$Moyenne_note = as.numeric(note_mpg$Moyenne_note)
 note_mpg$Club = as.factor(note_mpg$Club)
 
 # Convert variables starting with "J-"
@@ -75,7 +67,7 @@ note_mpg<-note_mpg[complete.cases(note_mpg[,2]),]
 #######################################
 ######### mutliplicateur de perf ######
 #######################################
-j = 7
+j = 21
 #### On cherche a apporter plus d'importance aux performances recente 
 jour = seq(1,j)
 beta =log((jour+1)) # beta est notre conficient multiplicateur de performance par journee
@@ -98,8 +90,10 @@ perf$performance_beta = as.numeric(perf$performance_beta)
 # Puis on merge sur le data frame
 note_mpg = merge(note_mpg, perf, by.x = "Joueur", by.y = "V1" )
 
-perf = perf[order(-perf$performance_beta),]
-head(perf)
+perf = note_mpg[order(-note_mpg$performance_beta),]
+head(perf[which(perf$Poste == "D"),c("Joueur", "Cote", "But", "performance_beta")],30)
+
+
 ###########################################
 ######### Multiplicateur de cote ##########
 ###########################################
@@ -134,70 +128,53 @@ note_mpg$cote_alpha = cote_alpha
 
 # Top 10 des Buteurs ---
 n = 10
-top_buteur = note_mpg[,c("Poste", "Joueur", "Club", "Buts", "Moyenne_note")]
-top_buteur = top_buteur[order(-top_buteur$Buts),]
+top_buteur = note_mpg[,c("Poste", "Joueur", "But", "Cote")]
+top_buteur = top_buteur[order(-top_buteur$But),]
 top_buteur = top_buteur[1:n,]
 
 # Top 10 des performant ---
 n = 10
-top_perf = note_mpg[,c("Poste", "Joueur", "Club", "performance_beta", "Moyenne_note")]
-top_perf = top_perf[order(-top_perf$performance_beta),]
+top_perf = note_mpg[,c("Poste", "Joueur", "performance_beta", "Cote")]
+top_perf = top_perf[order(top_perf$performance_beta),]
 top_perf = top_perf[1:n,]
 
 # Top 10 des Joueurs les plus chers ---
 n = 10
-top_cote = note_mpg[,c("Poste", "Joueur", "Club", "Cote", "cote_alpha")]
+top_cote = note_mpg[,c("Poste", "Joueur","Club", "Cote", "cote_alpha")]
 top_cote = top_cote[order(-top_cote$cote_alpha),]
 top_cote = top_cote[1:n,]
 
 
 # Top 10 des Joueurs les plus reguliers --
 n = 10
-top_moy = note_mpg[,c("Poste", "Joueur", "Club", "Moyenne_note", "performance_beta")]
+top_moy = note_mpg[,c("Poste", "Joueur", "Club", "performance_beta")]
 top_moy = top_moy[order(-top_moy$performance_beta),]
 top_moy = top_moy[1:n,]
 
 
-# TOP 10 des remplacants les plus utilisés --
-n = 10
-top_entrees = note_mpg[,c("Poste", "Joueur", "Club", "Entrees")]
-top_entrees = top_entrees[order(-top_entrees$Entrees),]
-top_entrees = top_entrees[1:n,]
-
-
-# TOP 5 des supersub --
-n = 5
-entree_titu = note_mpg[,c("Poste","Joueur", "Club", "Buts", "Entrees", "Titu.", "Moyenne_note")]
-entree_titu$Ratio = entree_titu$Entrees/entree_titu$Titu.
-top_supersub = entree_titu[c(entree_titu$Ratio>=1.5),]
-top_supersub$Ratio = top_supersub$Buts/top_supersub$Entrees
-top_supersub = top_supersub[order(-top_supersub$Ratio),]
-top_supersub = top_supersub[1:n,]
-
-
 ## Top 10 des gardiens--
 n = 10
-top_G = note_mpg[c(note_mpg$Poste=="G"),c("Poste","Joueur", "Club","performance_beta", "Moyenne_note")]
+top_G = note_mpg[c(note_mpg$Poste=="G"),c("Poste","Joueur", "Club","performance_beta")]
 top_G = top_G[order(-top_G$performance_beta),]
 top_G = top_G[1:n,]
 
 
 ## TOP 10 des déf ---
-top_def = note_mpg[c(note_mpg$Poste=="D"),c("Poste","Joueur", "Club","performance_beta", "Moyenne_note")]
+top_def = note_mpg[c(note_mpg$Poste=="D"),c("Poste","Joueur", "Club","performance_beta")]
 top_def = top_def[order(-top_def$performance_beta),]
 top_def = top_def[1:n,]
 
 
 ## TOP 10 des milieux --
 n = 10
-top_mil = note_mpg[c(note_mpg$Poste=="M"),c("Poste","Joueur", "Club", "performance_beta", "Moyenne_note")]
+top_mil = note_mpg[c(note_mpg$Poste=="M"),c("Poste","Joueur", "Club", "performance_beta")]
 top_mil = top_mil[order(-top_mil$performance_beta),]
 top_mil = top_mil[1:n,]
 
 
 ## TOP 10 des attaquants ---
 n = 10
-top_att = note_mpg[c(note_mpg$Poste=="A"),c("Poste","Joueur", "Club", "performance_beta", "Moyenne_note")]
+top_att = note_mpg[c(note_mpg$Poste=="A"),c("Poste","Joueur", "Club", "performance_beta")]
 top_att = top_att[order(-top_att$performance_beta),]
 top_att = top_att[1:n,]
 
@@ -210,26 +187,12 @@ top_perle= perle[order(-perle$Ratio),]
 top_perle = top_perle[1:n,]
 
 
-# TOP joueur prolifiques (ratio Matchs joués/buts) ---
-n = 10
-prolifique = note_mpg[,c("Poste","Joueur", "Club", "Entrees", "Titu.","Buts")]
-prolifique[is.na(prolifique)] <- 0
-prolifique$Matchs = prolifique$Entrees+prolifique$Titu.
-top_prolifique = prolifique[c(prolifique$Matchs>2),c("Poste","Joueur", "Club", "Matchs","Buts")]
-
-# A discuter sur la selection individus MAtchs> 1 et consideré comme titu
-top_prolifique$ratio = top_prolifique$Buts/top_prolifique$Matchs
-top_prolifique = top_prolifique[order(-top_prolifique$ratio),]
-top_prolifique = top_prolifique[1:n,]
-
-
 
 #### Optimisation lienaire : OMPR 
 n = dim(note_mpg)[1]
 nb_joueurs = 2+6+6+4
 maxG = 15
 # Pour selectionner les joueurs desiré
-row_jpref = as.numeric(rownames(note_mpg[note_mpg$Joueur %in% liste,]))
 
 perf = scale(note_mpg$performance_beta ) *2
 cote = note_mpg$cote_alpha
@@ -265,7 +228,7 @@ results = get_solution(results, z[i])
 results = filter(results, value > 0)
 
 
-mercatoEx = note_mpg[results$i,c("Poste", "Joueur", "Club", "performance_beta", "Cote", "cote_alpha", "But")]
+mercatoEx = note_mpg[results$i,c("Poste", "Joueur", "performance_beta", "Cote", "cote_alpha", "But")]
 mercatoEx = mercatoEx[order(mercatoEx$Poste),]
 mercatoEx
 

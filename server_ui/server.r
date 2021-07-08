@@ -5,9 +5,13 @@
 # Find out more about building applications with Shiny here:
 #
 #    http://shiny.rstudio.com/
-#
+
 
 library(shiny)
+
+setwd("~/Projets_M2/Projet_MPG")
+
+source("global2.R")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -32,14 +36,14 @@ shinyServer(function(input, output) {
             perf = scale(note_mpg$performance_beta)
             perf[row_jpref,] = 100
             perf[row_jdet,] = -100
-            note_mpg$Buts[is.na(note_mpg$Buts)] <- 0
-            buts = scale(note_mpg$Buts)
-            buts[row_jpref,] = 100
-            buts[row_jdet,] = -100
+            note_mpg$But[is.na(note_mpg$But)] <- 0
+            But = scale(note_mpg$But)
+            But[row_jpref,] = 100
+            But[row_jdet,] = -100
             
             results= MIPModel() %>%
                 add_variable(z[i], i = 1:n, type = "binary") %>%
-                set_objective(sum_expr((perf[i] + buts[i]) * z[i], i = 1:n), "max") %>%
+                set_objective(sum_expr((perf[i] + But[i]) * z[i], i = 1:n), "max") %>%
                 add_constraint(sum_expr(z[i], i = 1:n) == nb_joueurs) %>%
                 add_constraint(sum_expr(cote[i] * z[i], i = 1:n) <= 500)  %>%
                 add_constraint( sum_expr(z[i], i = 1:n, poste[i] == "G") == nb_goal) %>%
@@ -62,7 +66,7 @@ shinyServer(function(input, output) {
             results = filter(results, value > 0)
             
             
-            mercato = note_mpg[results$i,c("Poste", "Joueur", "Club", "performance_beta", "Cote", "cote_alpha", "Buts")]
+            mercato = note_mpg[results$i,c("Poste", "Joueur", "Club", "performance_beta", "Cote", "cote_alpha", "But")]
             mercato = mercato[order(mercato$Poste),]
         })
     })
@@ -70,11 +74,9 @@ shinyServer(function(input, output) {
     output$effectif <- renderTable({
         input$update_team
         isolate({
-            effectif = note_mpg[c(note_mpg$Club==input$team),c("Poste","Joueur","Club", "Cote", "Moyenne_note")]
+            effectif = note_mpg[c(note_mpg$Club==input$team),c("Poste","Joueur","Club", "Cote", "performance_beta")]
             if(input$tri == "Cote"){
                 effectif = effectif[order(-effectif$Cote),]
-            } else if (input$tri == "Moyenne note") {
-                effectif = effectif[order(-effectif$Moyenne_note),]
             } else {
                 effectif = effectif[order(effectif$Poste),]
             }
@@ -159,14 +161,14 @@ shinyServer(function(input, output) {
               perf = scale(note_mpg$performance_beta)
               perf[row_jpref,] = 100
               perf[row_jdet,] = -100
-              note_mpg$Buts[is.na(note_mpg$Buts)] <- 0
-              buts = scale(note_mpg$Buts)
-              buts[row_jpref,] = 100
-              buts[row_jdet,] = -100
+              note_mpg$But[is.na(note_mpg$But)] <- 0
+              But = scale(note_mpg$But)
+              But[row_jpref,] = 100
+              But[row_jdet,] = -100
               
               results= MIPModel() %>%
               add_variable(z[i], i = 1:n, type = 'binary') %>%
-              set_objective(sum_expr((perf[i] + buts[i]) * z[i], i = 1:n), 'max') %>%
+              set_objective(sum_expr((perf[i] + But[i]) * z[i], i = 1:n), 'max') %>%
               add_constraint(sum_expr(z[i], i = 1:n) == nb_joueurs) %>%
               add_constraint(sum_expr(cote[i] * z[i], i = 1:n) <= 500)  %>%
               add_constraint( sum_expr(z[i], i = 1:n, poste[i] == 'G) == nb_goal) %>%
@@ -189,7 +191,7 @@ shinyServer(function(input, output) {
               results = filter(results, value > 0)
               
               
-              mercato = note_mpg[results$i,c('Poste', 'Joueur', 'Club', 'performance_beta', 'Cote', 'cote_alpha', 'Buts')]
+              mercato = note_mpg[results$i,c('Poste', 'Joueur', 'Club', 'performance_beta', 'Cote', 'cote_alpha', 'But')]
               mercato = mercato[order(mercato$Poste),]")
     })
     
